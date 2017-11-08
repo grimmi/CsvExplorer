@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PropertyChanged;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -20,6 +21,7 @@ namespace CsvExplorer
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>    
+    [AddINotifyPropertyChangedInterface]
     public partial class MainWindow : Window
     {
         public ICommand OpenFileCommand => new RelayCommand((o) => OpenFile());
@@ -57,7 +59,6 @@ namespace CsvExplorer
                 }
 
                 CsvData = data.DefaultView;
-                csvData.ItemsSource = data.DefaultView;
             }
         }
     }
