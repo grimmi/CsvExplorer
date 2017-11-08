@@ -24,8 +24,9 @@
             </Button>
         </StackPanel>
 
-        <DataGrid x:Name="csvData" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding ElementName=theWindow, Path=CsvData}">
-            
+        <DataGrid x:Name="csvData" Grid.Column="1" Grid.Row="1" 
+                  ItemsSource="{Binding ElementName=theWindow, Path=CsvData}"
+                  CanUserAddRows="False" CanUserDeleteRows="False">            
         </DataGrid>
     </Grid>
 </Window>

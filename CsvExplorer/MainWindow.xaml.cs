@@ -1,4 +1,5 @@
-﻿using PropertyChanged;
+﻿using Microsoft.Win32;
+using PropertyChanged;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -35,7 +36,12 @@ namespace CsvExplorer
 
         private void OpenFile()
         {
-            LoadIntoDataGrid(@"c:\temp\test.csv");
+            var dialog = new OpenFileDialog();
+            var result = dialog.ShowDialog();
+            if (result.HasValue && result.Value)
+            {
+                LoadIntoDataGrid(dialog.FileName);
+            }
         }
 
         private void LoadIntoDataGrid(string file)
