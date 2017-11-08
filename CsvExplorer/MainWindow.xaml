@@ -4,11 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CsvExplorer"
+        x:Name="theWindow"
         mc:Ignorable="d"
         Title="MainWindow" Height="768" Width="1024">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -16,10 +17,15 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="5"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <Menu Grid.Row="0" Grid.Column="1">
-            <MenuItem Header="File">
-                <MenuItem Header="Load File" />
-            </MenuItem>
-        </Menu>
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="0">
+            <Button HorizontalAlignment="Left" BorderBrush="Transparent"
+                ToolTip="Open File" Command="{Binding ElementName=theWindow, Path=OpenFileCommand}">
+                <Image Source="Resources/open_file.png" />
+            </Button>
+        </StackPanel>
+
+        <DataGrid x:Name="csvData" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding ElementName=theWindow, Path=CsvData}">
+            
+        </DataGrid>
     </Grid>
 </Window>
