@@ -40,6 +40,7 @@ namespace CsvExplorer
         {
             Guesser = new DataTypeGuesser();
             Guesser.AddGuesser(new EmailGuesser());
+            Guesser.AddGuesser(new IntegerGuesser());
         }
 
         private void OpenFile()
