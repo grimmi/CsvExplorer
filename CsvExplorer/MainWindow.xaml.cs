@@ -91,6 +91,10 @@ namespace CsvExplorer
 
                 var contentLine = "";
                 var rows = new List<string[]>();
+                foreach(var probeLine in probeLines)
+                {
+                    data.Rows.Add(probeLine);
+                }
                 while((contentLine = reader.ReadLine()) != null)
                 {
                     var contentParts = contentLine.Split(';');
