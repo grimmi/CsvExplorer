@@ -60,10 +60,6 @@ namespace CsvExplorer
             {
                 var headerLine = reader.ReadLine();
                 var headerNames = headerLine.Split(';');
-                foreach(var header in headerNames)
-                {
-                    data.Columns.Add(new DataColumn(header, typeof(string)));
-                }
 
                 var probeLines = new List<string[]>();
                 for(int i = 0; i < 10; i++)
@@ -84,9 +80,17 @@ namespace CsvExplorer
                     }
                 }
 
+                var guessedDatatypes = new List<DataType>();
+
                 foreach(var column in probeData)
                 {
-                    var dataType = Guesser.GuessType(column.ToArray());
+                    guessedDatatypes.Add(Guesser.GuessType(column.ToArray()));
+                }
+
+                for(int i = 0; i < headerNames.Length; i++)
+                {
+                    var header = $"{headerNames[i]} ({guessedDatatypes[i]})";
+                    data.Columns.Add(new DataColumn(header, typeof(string)));
                 }
 
                 var contentLine = "";
