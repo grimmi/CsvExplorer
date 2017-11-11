@@ -28,10 +28,18 @@ namespace CsvExplorer
         public ICommand OpenFileCommand => new RelayCommand((o) => OpenFile());
 
         public DataView CsvData { get; set; }
+        private DataTypeGuesser Guesser { get; set; }
 
         public MainWindow()
         {
+            SetupGuesser();
             InitializeComponent();
+        }
+
+        private void SetupGuesser()
+        {
+            Guesser = new DataTypeGuesser();
+            Guesser.AddGuesser(new EmailGuesser());
         }
 
         private void OpenFile()
@@ -77,8 +85,7 @@ namespace CsvExplorer
 
                 foreach(var column in probeData)
                 {
-                    var dataType = new DataTypeGuesser().GuessType(column.ToArray());
-                    MessageBox.Show(dataType.ToString());
+                    var dataType = Guesser.GuessType(column.ToArray());
                 }
 
                 var contentLine = "";

@@ -11,7 +11,8 @@ namespace CsvExplorer
     public enum DataType
     {
         Text,
-        Number,
+        Integer,
+        Float,
         Email,
         IpAddress,
         Date,
@@ -20,25 +21,26 @@ namespace CsvExplorer
 
     public class DataTypeGuesser
     {
+        private IList<IDataTypeGuesser> Guessers { get; } = new List<IDataTypeGuesser>();
+
+        public void AddGuesser(IDataTypeGuesser guesser)
+        {
+            Guessers.Add(guesser);
+        }
+
         public DataType GuessType(string[] values)
         {
             var threshold = 0.8;
 
-            var emailGuess = GuessEmail(values);
+            var guesses = Guessers.Select(g => g.Guess(values));
 
-            if(emailGuess >= threshold)
-            {
-                return DataType.Email;
-            }
+            var bestChance = guesses.Max(g => g.Chance);
 
-            return DataType.Text;
-        }
+            if (bestChance < threshold) return DataType.Text;
 
-        private double GuessEmail(string[] values)
-        {
-            var tlds = File.ReadAllLines("./GuessData/tldlist.txt");
+            var bestTypes = guesses.Where(g => g.Chance == bestChance).Select(g => g.DataType);
 
-            return (double)values.Count(v => v.Contains("@") && v.Contains(".") && tlds.Any(tld => v.ToUpper().EndsWith(tld))) / values.Count();
+            return bestTypes.First();
         }
     }
 }
