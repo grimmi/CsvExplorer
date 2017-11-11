@@ -65,6 +65,7 @@
     </ApplicationDefinition>
     <Compile Include="DataTypeGuesser.cs" />
     <Compile Include="EmailGuesser.cs" />
+    <Compile Include="FloatGuesser.cs" />
     <Compile Include="IntegerGuesser.cs" />
     <Compile Include="RelayCommand.cs" />
     <Page Include="MainWindow.xaml">
