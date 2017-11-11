@@ -56,6 +56,31 @@ namespace CsvExplorer
                     data.Columns.Add(new DataColumn(header, typeof(string)));
                 }
 
+                var probeLines = new List<string[]>();
+                for(int i = 0; i < 10; i++)
+                {
+                    probeLines.Add(reader.ReadLine().Split(';'));
+                }
+
+                var probeData = new List<List<string>>();
+                foreach(var probeLine in probeLines)
+                {
+                    for(int i = 0; i < probeLine.Length; i++)
+                    {
+                        if(i >= probeData.Count)
+                        {
+                            probeData.Add(new List<string>());
+                        }
+                        probeData[i].Add(probeLine[i]);
+                    }
+                }
+
+                foreach(var column in probeData)
+                {
+                    var dataType = new DataTypeGuesser().GuessType(column.ToArray());
+                    MessageBox.Show(dataType.ToString());
+                }
+
                 var contentLine = "";
                 var rows = new List<string[]>();
                 while((contentLine = reader.ReadLine()) != null)
