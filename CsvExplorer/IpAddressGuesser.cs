@@ -12,7 +12,7 @@ namespace CsvExplorer
 
             foreach(var value in values)
             {
-                if (IPAddress.TryParse(value, out var adr)) validIps++;
+                if (value.Count(c => c == '.') == 3 && IPAddress.TryParse(value, out var adr)) validIps++;
             }
 
             return ((double)validIps / values.Count(), DataType.IpAddress);
