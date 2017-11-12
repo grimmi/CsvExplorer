@@ -67,6 +67,7 @@
     <Compile Include="EmailGuesser.cs" />
     <Compile Include="FloatGuesser.cs" />
     <Compile Include="IntegerGuesser.cs" />
+    <Compile Include="IpAddressGuesser.cs" />
     <Compile Include="RelayCommand.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
