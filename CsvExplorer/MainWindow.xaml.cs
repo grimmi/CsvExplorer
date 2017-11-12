@@ -30,6 +30,21 @@ namespace CsvExplorer
         public DataView CsvData { get; set; }
         private DataTypeGuesser Guesser { get; set; }
 
+        private static Func<string[], int, bool> defaultFilter = (vs, c) => true;
+        private Func<string[], int, bool> currentFilter = defaultFilter;
+        public Func<string[], int, bool> CurrentFilter
+        {
+            get { return currentFilter; }
+            set { currentFilter = value; LoadData(); }
+        }
+
+        private string currentFile = "";
+        private string CurrentFile
+        {
+            get { return currentFile; }
+            set { currentFile = value; LoadData(); }
+        }
+
         public MainWindow()
         {
             SetupGuesser();
@@ -51,14 +66,14 @@ namespace CsvExplorer
             var result = dialog.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                LoadIntoDataGrid(dialog.FileName);
+                CurrentFile = dialog.FileName;
             }
         }
 
-        private void LoadIntoDataGrid(string file)
+        private void LoadData()
         {
             var data = new DataTable();
-            using (var reader = new StreamReader(file))
+            using (var reader = new StreamReader(CurrentFile))
             {
                 var headerLine = reader.ReadLine();
                 var headerNames = headerLine.Split(';');
@@ -99,15 +114,34 @@ namespace CsvExplorer
                 var rows = new List<string[]>();
                 foreach(var probeLine in probeLines)
                 {
-                    data.Rows.Add(probeLine);
+                    if (CurrentFilter(probeLine, 1))
+                    {
+                        data.Rows.Add(probeLine);
+                    }
                 }
                 while((contentLine = reader.ReadLine()) != null)
                 {
                     var contentParts = contentLine.Split(';');
-                    data.Rows.Add(contentParts);
+                    if (CurrentFilter(contentParts, 2))
+                    {
+                        data.Rows.Add(contentParts);
+                    }
                 }
 
                 CsvData = data.DefaultView;
+            }
+        }
+
+        private void DataGridFilterChanged(object sender, TextChangedEventArgs e)
+        {
+            var tBox = sender as TextBox;
+            if(tBox.Text.Length > 2)
+            {
+                CurrentFilter = (vs, c) => vs[1].ToLower().Contains(tBox.Text.ToLower());
+            }
+            else
+            {
+                CurrentFilter = defaultFilter;
             }
         }
     }

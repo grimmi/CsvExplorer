@@ -26,7 +26,17 @@
 
         <DataGrid x:Name="csvData" Grid.Column="1" Grid.Row="1" 
                   ItemsSource="{Binding ElementName=theWindow, Path=CsvData}"
-                  CanUserAddRows="False" CanUserDeleteRows="False">            
+                  CanUserAddRows="False" CanUserDeleteRows="False">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Filter">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/filter.png" />
+                        </MenuItem.Icon>
+                        <TextBox Width="200" TextChanged="DataGridFilterChanged"/>
+                    </MenuItem>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
         </DataGrid>
     </Grid>
 </Window>
