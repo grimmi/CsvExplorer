@@ -156,25 +156,6 @@ namespace CsvExplorer
 
         private void DataGridFilterChanged(object sender, TextChangedEventArgs e)
         {
-            var hitResult = VisualTreeHelper.HitTest(csvData, RightClickPosition);
-            var hit = hitResult.VisualHit;
-
-            var columnIndex = -1;
-
-            if((hit as FrameworkElement).Parent is DataGridCell cell)
-            {
-                columnIndex = cell.Column.DisplayIndex;
-            }
-
-            var tBox = sender as TextBox;
-            if(tBox.Text.Length > 2 && columnIndex > -1)
-            {
-               AddFilter((vs, c) => vs[columnIndex].ToLower().Contains(tBox.Text.ToLower()), columnIndex);
-            }
-            else
-            {
-                
-            }
         }
 
         private void DataGridMouseDown(object sender, MouseButtonEventArgs e)
@@ -182,6 +163,31 @@ namespace CsvExplorer
             if(e.RightButton == MouseButtonState.Pressed)
             {
                 RightClickPosition = e.GetPosition(csvData);
+            }
+        }
+
+        private void FilterBoxKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter) return;
+
+            var hitResult = VisualTreeHelper.HitTest(csvData, RightClickPosition);
+            var hit = hitResult.VisualHit;
+
+            var columnIndex = -1;
+
+            if ((hit as FrameworkElement).Parent is DataGridCell cell)
+            {
+                columnIndex = cell.Column.DisplayIndex;
+            }
+
+            var tBox = sender as TextBox;
+            if (tBox.Text.Length > 2 && columnIndex > -1)
+            {
+                AddFilter((vs, c) => vs[columnIndex].ToLower().Contains(tBox.Text.ToLower()), columnIndex);
+            }
+            else
+            {
+
             }
         }
     }

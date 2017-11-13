@@ -41,7 +41,7 @@
                         <MenuItem.Icon>
                             <Image Source="Resources/filter.png" />
                         </MenuItem.Icon>
-                        <TextBox Width="200" TextChanged="DataGridFilterChanged"/>
+                        <TextBox Width="200" KeyDown="FilterBoxKeyDown"/>
                     </MenuItem>
                 </ContextMenu>
             </DataGrid.ContextMenu>
