@@ -26,6 +26,14 @@ namespace CsvExplorer
     public partial class MainWindow : Window
     {
         public ICommand OpenFileCommand => new RelayCommand((o) => OpenFile());
+        public ICommand ClearFilterCommand => new RelayCommand((o) =>
+        {
+            foreach (var list in FilterList.Values)
+            {
+                list.Clear();
+            }
+            LoadData();
+        });
 
         public DataView CsvData { get; set; }
         private DataTypeGuesser Guesser { get; set; }
