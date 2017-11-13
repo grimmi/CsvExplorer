@@ -10,6 +10,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -24,7 +25,13 @@
             </Button>
         </StackPanel>
 
-        <DataGrid x:Name="csvData" Grid.Column="1" Grid.Row="1" 
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1"
+                    HorizontalAlignment="Left" VerticalAlignment="Center">
+            <TextBlock Text="Geladene Datei: " />
+            <TextBlock Text="{Binding ElementName=theWindow, Path=CurrentFile}" />
+        </StackPanel>
+        
+        <DataGrid x:Name="csvData" Grid.Column="1" Grid.Row="2" 
                   ItemsSource="{Binding ElementName=theWindow, Path=CsvData}"
                   CanUserAddRows="False" CanUserDeleteRows="False">
             <DataGrid.ContextMenu>

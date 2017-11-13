@@ -39,7 +39,7 @@ namespace CsvExplorer
         }
 
         private string currentFile = "";
-        private string CurrentFile
+        public string CurrentFile
         {
             get { return currentFile; }
             set { currentFile = value; LoadData(); }
