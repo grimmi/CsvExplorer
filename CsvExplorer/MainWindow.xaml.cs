@@ -30,13 +30,9 @@ namespace CsvExplorer
         public DataView CsvData { get; set; }
         private DataTypeGuesser Guesser { get; set; }
 
+        private Dictionary<int, List<Func<string[], int, bool>>> FilterList { get; set; } = new Dictionary<int, List<Func<string[], int, bool>>>();
+
         private static Func<string[], int, bool> defaultFilter = (vs, c) => true;
-        private Func<string[], int, bool> currentFilter = defaultFilter;
-        public Func<string[], int, bool> CurrentFilter
-        {
-            get { return currentFilter; }
-            set { currentFilter = value; LoadData(); }
-        }
 
         private string currentFile = "";
         public string CurrentFile
@@ -70,6 +66,12 @@ namespace CsvExplorer
             {
                 CurrentFile = dialog.FileName;
             }
+        }
+
+        private void AddFilter(Func<string[], int, bool> filter, int column)
+        {
+            FilterList[column].Add(filter);
+            LoadData();
         }
 
         private void LoadData()
@@ -110,13 +112,17 @@ namespace CsvExplorer
                 {
                     var header = $"{headerNames[i]} ({guessedDatatypes[i]})";
                     data.Columns.Add(new DataColumn(header, typeof(string)));
+                    if (!FilterList.ContainsKey(i))
+                    {
+                        FilterList[i] = new List<Func<string[], int, bool>>();
+                    }
                 }
 
                 var contentLine = "";
                 var rows = new List<string[]>();
                 foreach(var probeLine in probeLines)
                 {
-                    if (CurrentFilter(probeLine, 1))
+                    if (CheckFilterList(probeLine))
                     {
                         data.Rows.Add(probeLine);
                     }
@@ -124,7 +130,7 @@ namespace CsvExplorer
                 while((contentLine = reader.ReadLine()) != null)
                 {
                     var contentParts = contentLine.Split(';');
-                    if (CurrentFilter(contentParts, 2))
+                    if (CheckFilterList(contentParts))
                     {
                         data.Rows.Add(contentParts);
                     }
@@ -132,6 +138,20 @@ namespace CsvExplorer
 
                 CsvData = data.DefaultView;
             }
+        }
+
+        private bool CheckFilterList(string[] line)
+        {
+            var visible = true;
+            for(int i = 0; i < line.Length; i++)
+            {
+                foreach(var filter in FilterList[i])
+                {
+                    visible &= filter(line, i);
+                }
+            }
+
+            return visible;
         }
 
         private void DataGridFilterChanged(object sender, TextChangedEventArgs e)
@@ -149,11 +169,11 @@ namespace CsvExplorer
             var tBox = sender as TextBox;
             if(tBox.Text.Length > 2 && columnIndex > -1)
             {
-                CurrentFilter = (vs, c) => vs[columnIndex].ToLower().Contains(tBox.Text.ToLower());
+               AddFilter((vs, c) => vs[columnIndex].ToLower().Contains(tBox.Text.ToLower()), columnIndex);
             }
             else
             {
-                CurrentFilter = defaultFilter;
+                
             }
         }
 
