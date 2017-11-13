@@ -33,9 +33,10 @@
         
         <DataGrid x:Name="csvData" Grid.Column="1" Grid.Row="2" 
                   ItemsSource="{Binding ElementName=theWindow, Path=CsvData}"
-                  CanUserAddRows="False" CanUserDeleteRows="False">
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  MouseDown="DataGridMouseDown">
             <DataGrid.ContextMenu>
-                <ContextMenu>
+                <ContextMenu x:Name="gridMenu">
                     <MenuItem Header="Filter">
                         <MenuItem.Icon>
                             <Image Source="Resources/filter.png" />

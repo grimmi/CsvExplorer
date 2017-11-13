@@ -45,6 +45,8 @@ namespace CsvExplorer
             set { currentFile = value; LoadData(); }
         }
 
+        public Point RightClickPosition { get; private set; }
+
         public MainWindow()
         {
             SetupGuesser();
@@ -134,14 +136,32 @@ namespace CsvExplorer
 
         private void DataGridFilterChanged(object sender, TextChangedEventArgs e)
         {
-            var tBox = sender as TextBox;
-            if(tBox.Text.Length > 2)
+            var hitResult = VisualTreeHelper.HitTest(csvData, RightClickPosition);
+            var hit = hitResult.VisualHit;
+
+            var columnIndex = -1;
+
+            if((hit as FrameworkElement).Parent is DataGridCell cell)
             {
-                CurrentFilter = (vs, c) => vs[1].ToLower().Contains(tBox.Text.ToLower());
+                columnIndex = cell.Column.DisplayIndex;
+            }
+
+            var tBox = sender as TextBox;
+            if(tBox.Text.Length > 2 && columnIndex > -1)
+            {
+                CurrentFilter = (vs, c) => vs[columnIndex].ToLower().Contains(tBox.Text.ToLower());
             }
             else
             {
                 CurrentFilter = defaultFilter;
+            }
+        }
+
+        private void DataGridMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if(e.RightButton == MouseButtonState.Pressed)
+            {
+                RightClickPosition = e.GetPosition(csvData);
             }
         }
     }
