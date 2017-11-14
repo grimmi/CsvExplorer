@@ -187,13 +187,9 @@ namespace CsvExplorer
             }
 
             var tBox = sender as TextBox;
-            if (tBox.Text.Length > 2 && columnIndex > -1)
+            if (columnIndex > -1)
             {
                 AddFilter(new TextFilter(tBox.Text.ToLower()), columnIndex);
-            }
-            else
-            {
-
             }
         }
     }
