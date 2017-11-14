@@ -164,10 +164,6 @@ namespace CsvExplorer
             return visible;
         }
 
-        private void DataGridFilterChanged(object sender, TextChangedEventArgs e)
-        {
-        }
-
         private void DataGridMouseDown(object sender, MouseButtonEventArgs e)
         {
             if(e.RightButton == MouseButtonState.Pressed)
