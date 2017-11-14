@@ -191,6 +191,8 @@ namespace CsvExplorer
             {
                 AddFilter(new TextFilter(tBox.Text.ToLower()), columnIndex);
             }
+
+            tBox.Text = string.Empty;
         }
     }
 }
