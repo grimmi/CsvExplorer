@@ -28,7 +28,7 @@ namespace CsvExplorer
         public ICommand OpenFileCommand => new RelayCommand((o) => OpenFile());
         public ICommand ClearFilterCommand => new RelayCommand((o) =>
         {
-            foreach (var list in FilterList.Values)
+            foreach (var list in FilterMap.Values)
             {
                 list.Clear();
             }
@@ -38,7 +38,7 @@ namespace CsvExplorer
         public DataView CsvData { get; set; }
         private DataTypeGuesser Guesser { get; set; }
 
-        private Dictionary<int, List<Func<string[], int, bool>>> FilterList { get; set; } = new Dictionary<int, List<Func<string[], int, bool>>>();
+        private Dictionary<int, List<Filter>> FilterMap { get; } = new Dictionary<int, List<Filter>>();
 
         private static Func<string[], int, bool> defaultFilter = (vs, c) => true;
 
@@ -76,12 +76,12 @@ namespace CsvExplorer
             }
         }
 
-        private void AddFilter(Func<string[], int, bool> filter, int column)
+        private void AddFilter(Filter filter, int column)
         {
-            FilterList[column].Add(filter);
+            FilterMap[column].Add(filter);
             LoadData();
         }
-
+        
         private void LoadData()
         {
             var data = new DataTable();
@@ -120,9 +120,9 @@ namespace CsvExplorer
                 {
                     var header = $"{headerNames[i]} ({guessedDatatypes[i]})";
                     data.Columns.Add(new DataColumn(header, typeof(string)));
-                    if (!FilterList.ContainsKey(i))
+                    if (!FilterMap.ContainsKey(i))
                     {
-                        FilterList[i] = new List<Func<string[], int, bool>>();
+                        FilterMap[i] = new List<Filter>();
                     }
                 }
 
@@ -151,11 +151,13 @@ namespace CsvExplorer
         private bool CheckFilterList(string[] line)
         {
             var visible = true;
+
             for(int i = 0; i < line.Length; i++)
             {
-                foreach(var filter in FilterList[i])
+                var value = line[i];
+                foreach(var filter in FilterMap[i])
                 {
-                    visible &= filter(line, i);
+                    visible &= filter.Matches(value);
                 }
             }
 
@@ -191,7 +193,7 @@ namespace CsvExplorer
             var tBox = sender as TextBox;
             if (tBox.Text.Length > 2 && columnIndex > -1)
             {
-                AddFilter((vs, c) => vs[columnIndex].ToLower().Contains(tBox.Text.ToLower()), columnIndex);
+                AddFilter(new TextFilter(tBox.Text.ToLower()), columnIndex);
             }
             else
             {

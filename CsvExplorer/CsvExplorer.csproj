@@ -69,6 +69,7 @@
     <Compile Include="IntegerGuesser.cs" />
     <Compile Include="IpAddressGuesser.cs" />
     <Compile Include="RelayCommand.cs" />
+    <Compile Include="TextFilter.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
