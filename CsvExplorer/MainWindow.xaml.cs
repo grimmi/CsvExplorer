@@ -4,18 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
+using System.Linq;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CsvExplorer
 {
@@ -50,6 +43,13 @@ namespace CsvExplorer
         }
 
         public Point RightClickPosition { get; private set; }
+        public int SelectedColumnIndex { get; set; } = 0;
+
+        public string SelectedColumn
+        {
+            get;
+            set;
+        } = "TheColumn";
 
         public MainWindow()
         {
@@ -109,16 +109,11 @@ namespace CsvExplorer
                     }
                 }
 
-                var guessedDatatypes = new List<DataType>();
-
-                foreach(var column in probeData)
-                {
-                    guessedDatatypes.Add(Guesser.GuessType(column.ToArray()));
-                }
+                var guessedDataTypes = probeData.Select(column => Guesser.GuessType(column.ToArray())).ToList();
 
                 for(int i = 0; i < headerNames.Length; i++)
                 {
-                    var header = $"{headerNames[i]} ({guessedDatatypes[i]})";
+                    var header = $"{headerNames[i]} ({guessedDataTypes[i]})";
                     data.Columns.Add(new DataColumn(header, typeof(string)));
                     if (!FilterMap.ContainsKey(i))
                     {
@@ -169,6 +164,19 @@ namespace CsvExplorer
             if(e.RightButton == MouseButtonState.Pressed)
             {
                 RightClickPosition = e.GetPosition(csvData);
+
+                var hitResult = VisualTreeHelper.HitTest(csvData, RightClickPosition);
+                var hit = hitResult.VisualHit;
+
+                if ((hit as FrameworkElement).Parent is DataGridCell cell)
+                {
+                    SelectedColumnIndex = cell.Column.DisplayIndex;
+                    SelectedColumn = cell.Column.Header?.ToString() ?? "";
+                }
+                else
+                {
+                    SelectedColumnIndex = -1;
+                }
             }
         }
 
@@ -176,20 +184,10 @@ namespace CsvExplorer
         {
             if (e.Key != Key.Enter) return;
 
-            var hitResult = VisualTreeHelper.HitTest(csvData, RightClickPosition);
-            var hit = hitResult.VisualHit;
-
-            var columnIndex = -1;
-
-            if ((hit as FrameworkElement).Parent is DataGridCell cell)
-            {
-                columnIndex = cell.Column.DisplayIndex;
-            }
-
             var tBox = sender as TextBox;
-            if (columnIndex > -1)
+            if (SelectedColumnIndex > -1)
             {
-                AddFilter(new TextFilter(tBox.Text.ToLower()), columnIndex);
+                AddFilter(new TextFilter(tBox.Text.ToLower()), SelectedColumnIndex);
             }
 
             tBox.Text = string.Empty;

@@ -42,6 +42,8 @@
                   MouseDown="DataGridMouseDown">
             <DataGrid.ContextMenu>
                 <ContextMenu x:Name="gridMenu">
+                    <MenuItem Header="{Binding ElementName=theWindow, Path=SelectedColumn}" 
+                              IsEnabled="False"/>
                     <MenuItem Header="Filter">
                         <MenuItem.Icon>
                             <Image Source="Resources/filter.png" />
