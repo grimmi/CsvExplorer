@@ -28,10 +28,15 @@ namespace CsvExplorer
             LoadData();
         });
 
+        public ICommand HideColumnCommand => new RelayCommand((o) => HideColumn(SelectedColumnIndex));
+
+        public ICommand ShowColumnsCommand => new RelayCommand((o) => { HiddenColumns.Clear(); LoadData(); });
+
         public DataView CsvData { get; set; }
         private DataTypeGuesser Guesser { get; set; }
 
         private Dictionary<int, List<Filter>> FilterMap { get; } = new Dictionary<int, List<Filter>>();
+        private List<int> HiddenColumns { get; } = new List<int>();
 
         private static Func<string[], int, bool> defaultFilter = (vs, c) => true;
 
@@ -81,6 +86,13 @@ namespace CsvExplorer
             FilterMap[column].Add(filter);
             LoadData();
         }
+
+        private void HideColumn(int idx)
+        {
+            if (idx == -1) return;
+            HiddenColumns.Add(idx);
+            LoadData();
+        }
         
         private void LoadData()
         {
@@ -113,6 +125,8 @@ namespace CsvExplorer
 
                 for(int i = 0; i < headerNames.Length; i++)
                 {
+                    if (HiddenColumns.Contains(i)) continue;
+
                     var header = $"{headerNames[i]} ({guessedDataTypes[i]})";
                     data.Columns.Add(new DataColumn(header, typeof(string)));
                     if (!FilterMap.ContainsKey(i))
@@ -125,14 +139,15 @@ namespace CsvExplorer
                 var rows = new List<string[]>();
                 foreach(var probeLine in probeLines)
                 {
-                    if (CheckFilterList(probeLine))
+                    var valueLine = probeLine.Where((v, idx) => !HiddenColumns.Contains(idx)).ToArray();
+                    if (CheckFilterList(valueLine))
                     {
-                        data.Rows.Add(probeLine);
+                        data.Rows.Add(valueLine);
                     }
                 }
                 while((contentLine = reader.ReadLine()) != null)
                 {
-                    var contentParts = contentLine.Split(';');
+                    var contentParts = contentLine.Split(';').Where((v, idx) => !HiddenColumns.Contains(idx)).ToArray();
                     if (CheckFilterList(contentParts))
                     {
                         data.Rows.Add(contentParts);
@@ -192,5 +207,7 @@ namespace CsvExplorer
 
             tBox.Text = string.Empty;
         }
+
+        private void HideColumnClicked(object sender, EventArgs e) => HideColumnCommand.Execute(null);
     }
 }
