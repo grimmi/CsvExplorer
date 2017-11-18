@@ -32,6 +32,8 @@ namespace CsvExplorer
 
         public ICommand ShowColumnsCommand => new RelayCommand((o) => { HiddenColumns.Clear(); LoadData(); });
 
+        public ICommand ReloadDocumentCommand => new RelayCommand((o) => { HiddenColumns.Clear(); FilterMap.Clear(); LoadData(); });
+
         public DataView CsvData { get; set; }
         private DataTypeGuesser Guesser { get; set; }
 
