@@ -249,7 +249,23 @@ namespace CsvExplorer
 
         private void CopyColumnClicked(object sender, EventArgs e)
         {
+            if (SelectedColumnIndex == 1) return;
 
+            var column = csvData.Columns[SelectedColumnIndex];
+
+            var values = new List<string>();
+
+            foreach(var item in csvData.Items)
+            {
+                var cell = column.GetCellContent(item);
+
+                if(cell is TextBlock block)
+                {
+                    values.Add(block.Text);
+                }
+            }
+
+            Clipboard.SetText(string.Join(Environment.NewLine, values));
         }
     }
 }
