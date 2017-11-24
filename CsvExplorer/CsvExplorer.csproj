@@ -35,6 +35,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>csv.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MaterialDesignColors, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignColors.1.1.2\lib\net45\MaterialDesignColors.dll</HintPath>
@@ -141,6 +144,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\reload.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\csv.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\csv.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="csv.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.2.0.0\build\netstandard1.4\Fody.targets" Condition="Exists('..\packages\Fody.2.0.0\build\netstandard1.4\Fody.targets')" />
