@@ -58,6 +58,9 @@ namespace CsvExplorer
             set;
         } = "TheColumn";
 
+        public int SelectedRowIndex { get; set; } = 0;
+        private DataGridRow SelectedRow { get; set; }
+
         public MainWindow()
         {
             SetupGuesser();
@@ -189,10 +192,24 @@ namespace CsvExplorer
                 {
                     SelectedColumnIndex = cell.Column.DisplayIndex;
                     SelectedColumn = cell.Column.Header?.ToString() ?? "";
+
+                    var parent = VisualTreeHelper.GetParent(cell);
+                    while(parent != null && !(parent is DataGridRow))
+                    {
+                        parent = VisualTreeHelper.GetParent(parent);
+                    }
+
+                    if(parent is DataGridRow row)
+                    {
+                        SelectedRowIndex = csvData.ItemContainerGenerator.IndexFromContainer(row);
+                        SelectedRow = row;
+                    }
+
                 }
                 else
                 {
                     SelectedColumnIndex = -1;
+                    SelectedRowIndex = -1;
                 }
             }
         }
@@ -211,5 +228,28 @@ namespace CsvExplorer
         }
 
         private void HideColumnClicked(object sender, EventArgs e) => HideColumnCommand.Execute(null);
+
+        private void CopyRowClicked(object sender, EventArgs e)
+        {
+            if (SelectedRowIndex == -1) return;
+
+            var values = new List<string>();
+
+            for(int i = 0; i < csvData.Columns.Count; i++)
+            {
+                var content = csvData.Columns[i].GetCellContent(SelectedRow);
+                if(content is TextBlock block)
+                {
+                    values.Add(block.Text);
+                }
+            }
+
+            Clipboard.SetText(string.Join(";", values));
+        }
+
+        private void CopyColumnClicked(object sender, EventArgs e)
+        {
+
+        }
     }
 }
