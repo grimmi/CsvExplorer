@@ -19,36 +19,25 @@ namespace CsvExplorer
     public partial class MainWindow : Window
     {
         public ICommand OpenFileCommand => new RelayCommand((o) => OpenFile());
-        public ICommand ClearFilterCommand => new RelayCommand((o) =>
-        {
-            foreach (var list in FilterMap.Values)
-            {
-                list.Clear();
-            }
-            LoadData();
-        });
+        public ICommand ClearFilterCommand => new RelayCommand((o) => Loader.ClearFilters());
 
-        public ICommand HideColumnCommand => new RelayCommand((o) => HideColumn(SelectedColumnIndex));
+        public ICommand HideColumnCommand => new RelayCommand((o) => Loader.HideColumn(SelectedColumnIndex));
 
-        public ICommand ShowColumnsCommand => new RelayCommand((o) => { HiddenColumns.Clear(); LoadData(); });
+        public ICommand ShowColumnsCommand => new RelayCommand((o) => { Loader.ClearHiddenColumns(); });
 
-        public ICommand ReloadDocumentCommand => new RelayCommand((o) => { HiddenColumns.Clear(); FilterMap.Clear(); LoadData(); });
+        public ICommand ReloadDocumentCommand => new RelayCommand((o) => { Loader.ClearHiddenColumns(false); Loader.ClearFilters(); });
 
         public DataView CsvData { get; set; }
-        private DataTypeGuesser Guesser { get; set; }
 
         private DataTable dataTable;
-
-        private Dictionary<int, List<Filter>> FilterMap { get; } = new Dictionary<int, List<Filter>>();
-        private List<int> HiddenColumns { get; } = new List<int>();
-
+        
         private static Func<string[], int, bool> defaultFilter = (vs, c) => true;
 
         private string currentFile = "";
         public string CurrentFile
         {
             get { return currentFile; }
-            set { currentFile = value; LoadData(); }
+            set { currentFile = value; }
         }
 
         public Point RightClickPosition { get; private set; }
@@ -63,19 +52,12 @@ namespace CsvExplorer
         public int SelectedRowIndex { get; set; } = 0;
         private DataGridRow SelectedRow { get; set; }
 
+        private DataLoader Loader { get; } = new DataLoader();
+
         public MainWindow()
         {
-            SetupGuesser();
             InitializeComponent();
-        }
-
-        private void SetupGuesser()
-        {
-            Guesser = new DataTypeGuesser();
-            Guesser.AddGuesser(new EmailGuesser());
-            Guesser.AddGuesser(new IpAddressGuesser());
-            Guesser.AddGuesser(new IntegerGuesser());
-            Guesser.AddGuesser(new FloatGuesser());
+            Loader.DataLoaded += LoadData;
         }
 
         private void OpenFile()
@@ -85,105 +67,18 @@ namespace CsvExplorer
             if (result.HasValue && result.Value)
             {
                 CurrentFile = dialog.FileName;
+                Loader.CurrentFile = CurrentFile;
             }
         }
 
-        private void AddFilter(Filter filter, int column)
+        private void LoadData(object sender, DataLoadedEventArgs loadedData)
         {
-            FilterMap[column].Add(filter);
-            LoadData();
-        }
-
-        private void HideColumn(int idx)
-        {
-            if (idx == -1) return;
-            HiddenColumns.Add(idx);
-            LoadData();
-        }
-        
-        private void LoadData()
-        {
-            dataTable = new DataTable();
-            using (var reader = new StreamReader(CurrentFile))
-            {
-                var headerLine = reader.ReadLine();
-                var headerNames = headerLine.Split(';');
-
-                var probeLines = new List<string[]>();
-                for(int i = 0; i < 10; i++)
-                {
-                    probeLines.Add(reader.ReadLine().Split(';'));
-                }
-
-                var probeData = new List<List<string>>();
-                foreach(var probeLine in probeLines)
-                {
-                    for(int i = 0; i < probeLine.Length; i++)
-                    {
-                        if(i >= probeData.Count)
-                        {
-                            probeData.Add(new List<string>());
-                        }
-                        probeData[i].Add(probeLine[i]);
-                    }
-                }
-
-                var guessedDataTypes = probeData.Select(column => Guesser.GuessType(column.ToArray())).ToList();
-
-                for(int i = 0; i < headerNames.Length; i++)
-                {
-                    if (HiddenColumns.Contains(i)) continue;
-
-                    var header = $"{headerNames[i]} ({guessedDataTypes[i]})";
-                    dataTable.Columns.Add(new DataColumn(header, typeof(string)));
-                    if (!FilterMap.ContainsKey(i))
-                    {
-                        FilterMap[i] = new List<Filter>();
-                    }
-                }
-
-                var contentLine = "";
-                var rows = new List<string[]>();
-                foreach(var probeLine in probeLines)
-                {
-                    var valueLine = probeLine.Where((v, idx) => !HiddenColumns.Contains(idx)).ToArray();
-                    if (CheckFilterList(valueLine))
-                    {
-                        dataTable.Rows.Add(valueLine);
-                    }
-                }
-                while((contentLine = reader.ReadLine()) != null)
-                {
-                    var contentParts = contentLine.Split(';').Where((v, idx) => !HiddenColumns.Contains(idx)).ToArray();
-                    if (CheckFilterList(contentParts))
-                    {
-                        dataTable.Rows.Add(contentParts);
-                    }
-                }
-
-                CsvData = dataTable.DefaultView;
-            }
-        }
-
-        private bool CheckFilterList(string[] line)
-        {
-            var visible = true;
-
-            for(int i = 0; i < line.Length; i++)
-            {
-                var value = line[i];
-                foreach(var filter in FilterMap[i])
-                {
-                    visible &= filter.Matches(value);
-                }
-            }
-
-            return visible;
+            CsvData = loadedData.LoadedData.DefaultView;
         }
 
         private void DataGridMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if(e.RightButton == MouseButtonState.Pressed)
+            if (e.RightButton == MouseButtonState.Pressed)
             {
                 RightClickPosition = e.GetPosition(csvData);
 
@@ -196,17 +91,16 @@ namespace CsvExplorer
                     SelectedColumn = cell.Column.Header?.ToString() ?? "";
 
                     var parent = VisualTreeHelper.GetParent(cell);
-                    while(parent != null && !(parent is DataGridRow))
+                    while (parent != null && !(parent is DataGridRow))
                     {
                         parent = VisualTreeHelper.GetParent(parent);
                     }
 
-                    if(parent is DataGridRow row)
+                    if (parent is DataGridRow row)
                     {
                         SelectedRowIndex = csvData.ItemContainerGenerator.IndexFromContainer(row);
                         SelectedRow = row;
                     }
-
                 }
                 else
                 {
@@ -223,7 +117,7 @@ namespace CsvExplorer
             var tBox = sender as TextBox;
             if (SelectedColumnIndex > -1)
             {
-                AddFilter(new TextFilter(tBox.Text.ToLower()), SelectedColumnIndex);
+                Loader.AddFilter(new TextFilter(tBox.Text.ToLower()), SelectedColumnIndex);
             }
 
             tBox.Text = string.Empty;
@@ -237,10 +131,10 @@ namespace CsvExplorer
 
             var values = new List<string>();
 
-            for(int i = 0; i < csvData.Columns.Count; i++)
+            for (int i = 0; i < csvData.Columns.Count; i++)
             {
                 var content = csvData.Columns[i].GetCellContent(SelectedRow);
-                if(content is TextBlock block)
+                if (content is TextBlock block)
                 {
                     values.Add(block.Text);
                 }
@@ -259,20 +153,6 @@ namespace CsvExplorer
             {
                 values.Add(row[column]?.ToString());
             }
-
-            //var column = csvData.Columns[SelectedColumnIndex];
-
-            //var values = new List<string>();
-
-            //foreach(var item in csvData.Items)
-            //{
-            //    var cell = column.GetCellContent(item);
-
-            //    if(cell is TextBlock block)
-            //    {
-            //        values.Add(block.Text);
-            //    }
-            //}
 
             Clipboard.SetText(string.Join(Environment.NewLine, values));
         }
