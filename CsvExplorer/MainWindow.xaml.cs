@@ -89,6 +89,7 @@ namespace CsvExplorer
                 {
                     SelectedColumnIndex = cell.Column.DisplayIndex;
                     SelectedColumn = cell.Column.Header?.ToString() ?? "";
+                    columnItem.Header = SelectedColumn;
 
                     var parent = VisualTreeHelper.GetParent(cell);
                     while (parent != null && !(parent is DataGridRow))
