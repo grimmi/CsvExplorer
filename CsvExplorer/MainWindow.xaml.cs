@@ -9,6 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Linq;
 using System.Windows.Media;
+using System.Configuration;
+using System.Reflection;
 
 namespace CsvExplorer
 {
@@ -62,12 +64,19 @@ namespace CsvExplorer
 
         private void OpenFile()
         {
+            var config = ConfigurationManager.OpenExeConfiguration(Assembly.GetEntryAssembly().Location);
+            var lastFile = config.AppSettings.Settings["filepath"]?.Value;
+
             var dialog = new OpenFileDialog();
+            if (!string.IsNullOrWhiteSpace(lastFile)) dialog.InitialDirectory = Path.GetDirectoryName(lastFile);
             var result = dialog.ShowDialog();
             if (result.HasValue && result.Value)
             {
                 CurrentFile = dialog.FileName;
                 Loader.CurrentFile = CurrentFile;
+                config.AppSettings.Settings.Remove("filepath");
+                config.AppSettings.Settings.Add("filepath", CurrentFile);
+                config.Save();
             }
         }
 
