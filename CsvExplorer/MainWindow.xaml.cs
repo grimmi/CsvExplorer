@@ -1,19 +1,18 @@
-﻿using Microsoft.Win32;
-using PropertyChanged;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Linq;
-using System.Windows.Media;
-using System.Configuration;
-using System.Reflection;
-
-namespace CsvExplorer
+﻿namespace CsvExplorer
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.Data;
+    using System.IO;
+    using System.Reflection;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Input;
+    using System.Windows.Media;
+    using Microsoft.Win32;
+    using PropertyChanged;
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>    
@@ -35,7 +34,7 @@ namespace CsvExplorer
         
         private static Func<string[], int, bool> defaultFilter = (vs, c) => true;
 
-        private string currentFile = "";
+        private string currentFile = string.Empty;
         public string CurrentFile
         {
             get { return currentFile; }
@@ -68,7 +67,11 @@ namespace CsvExplorer
             var lastFile = config.AppSettings.Settings["filepath"]?.Value;
 
             var dialog = new OpenFileDialog();
-            if (!string.IsNullOrWhiteSpace(lastFile)) dialog.InitialDirectory = Path.GetDirectoryName(lastFile);
+            if (!string.IsNullOrWhiteSpace(lastFile))
+            {
+                dialog.InitialDirectory = Path.GetDirectoryName(lastFile);
+            }
+
             var result = dialog.ShowDialog();
             if (result.HasValue && result.Value)
             {
